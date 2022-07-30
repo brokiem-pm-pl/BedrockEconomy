@@ -15,4 +15,3 @@ projects:
       phpstan: false
 #      syntaxError: false
 ...
-

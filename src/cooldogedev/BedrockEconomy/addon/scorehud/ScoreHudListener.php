@@ -26,6 +26,8 @@ declare(strict_types=1);
 
 namespace cooldogedev\BedrockEconomy\addon\scorehud;
 
+use cooldogedev\BedrockEconomy\BedrockEconomy;
+use cooldogedev\BedrockEconomy\event\account\AccountCreationEvent;
 use cooldogedev\BedrockEconomy\event\transaction\TransactionProcessEvent;
 use cooldogedev\BedrockEconomy\transaction\types\TransferTransaction;
 use cooldogedev\BedrockEconomy\transaction\types\UpdateTransaction;
@@ -35,6 +37,7 @@ use Ifera\ScoreHud\scoreboard\ScoreTag;
 use pocketmine\event\Listener;
 use pocketmine\event\player\PlayerLoginEvent;
 use pocketmine\event\player\PlayerQuitEvent;
+use pocketmine\scheduler\ClosureTask;
 
 final class ScoreHudListener implements Listener
 {
@@ -131,5 +134,12 @@ final class ScoreHudListener implements Listener
             case ScoreHudAddon::SCOREHUD_TAG_CURRENCY_SYMBOL:
                 $tag->setValue($this->getParent()->getPlugin()->getCurrencyManager()->getSymbol());
         }
+    }
+
+    public function onAccountCreation(AccountCreationEvent $event): void
+    {
+        BedrockEconomy::getInstance()->getScheduler()->scheduleDelayedTask(new ClosureTask(function() use ($event) {
+            $this->getParent()->updatePlayerCache($event->getAccount());
+        }), 80);
     }
 }
